@@ -81,7 +81,7 @@ public class PanelJogoDaVelha extends JPanel implements MouseListener{
 					
 						case 1: // 1 é uma casa com X
 							g.drawLine(i+5, j+5, i+95, j+95);
-							g.drawLine(i+95, j+95, i+5, j+95);
+							g.drawLine(i+95, j+5, i+5, j+95);
 							break;
 							
 						case 2: // 2  é uma cas com O
@@ -187,6 +187,14 @@ public class PanelJogoDaVelha extends JPanel implements MouseListener{
 	@Override
 	public void mouseReleased(MouseEvent arg0) {
 		
+	}
+	
+	public void reset() {
+		for (int i = 0; i < casas.length; i++) {
+			for (int j = 0; j < casas.length; j++) {
+				casas[i][j] = 0;
+			}
+		}
 	}
 	
 

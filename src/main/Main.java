@@ -186,49 +186,55 @@ public class Main {
 	//metodo pra atualizar a textArea do visualizador (Clientes)
 	
 	private void atualizarVisualizadorCliente() {
-		Cliente c = (Cliente) comboBox_cliente_visualizador.getSelectedItem();
-		textArea_VisualizarClientes.setText("");
-		textArea_VisualizarClientes.append("Nome: ");
-		textArea_VisualizarClientes.append(c.getNome() + ".\n");
-		textArea_VisualizarClientes.append("CPF: ");
-		textArea_VisualizarClientes.append(c.getCpf() + ".\n");
-		textArea_VisualizarClientes.append("E-Mail: ");
-		textArea_VisualizarClientes.append(c.getEmail() + ".\n");
-		textArea_VisualizarClientes.append("Telefone: ");
-		textArea_VisualizarClientes.append(c.getTelefone() + ".\n");
-		textArea_VisualizarClientes.append("Pets cadastrados: \n");
+		Cliente c =  null; 
 		
-		for (int i = 0; i < c.getPets().size(); i++) {
-			Pet pet = c.getPets().get(i);
-			textArea_VisualizarClientes.append("Cadastro " + i + ": \n");
-			textArea_VisualizarClientes.append("    Nome: ");
-			textArea_VisualizarClientes.append(pet.getNome()+ ".\n");
+		try {
+			c =(Cliente) comboBox_cliente_visualizador.getSelectedItem();
+			textArea_VisualizarClientes.setText("");
+			textArea_VisualizarClientes.append("Nome: ");
+			textArea_VisualizarClientes.append(c.getNome() + ".\n");
+			textArea_VisualizarClientes.append("CPF: ");
+			textArea_VisualizarClientes.append(c.getCpf() + ".\n");
+			textArea_VisualizarClientes.append("E-Mail: ");
+			textArea_VisualizarClientes.append(c.getEmail() + ".\n");
+			textArea_VisualizarClientes.append("Telefone: ");
+			textArea_VisualizarClientes.append(c.getTelefone() + ".\n");
+			textArea_VisualizarClientes.append("Pets cadastrados: \n");
 			
-			textArea_VisualizarClientes.append("    Idade: ");
-			textArea_VisualizarClientes.append(pet.getIdade()+ ".\n");
-			
-
-			textArea_VisualizarClientes.append("    Espécie: ");
-			textArea_VisualizarClientes.append(pet.getEspecie()+ ".\n");
-			
-			textArea_VisualizarClientes.append("    Raça: ");
-			textArea_VisualizarClientes.append(pet.getRaca()+ ".\n");
-			
-			String ultimaConsulta = "";
-			
-			try {
-				ultimaConsulta = pet.getUltimaConsulta().getDataFormatada();
+			for (int i = 0; i < c.getPets().size(); i++) {
+				Pet pet = c.getPets().get(i);
+				textArea_VisualizarClientes.append("Cadastro " + i + ": \n");
+				textArea_VisualizarClientes.append("    Nome: ");
+				textArea_VisualizarClientes.append(pet.getNome()+ ".\n");
 				
-				textArea_VisualizarClientes.append("    Número de Consultas Realizadas: ");
-				textArea_VisualizarClientes.append(pet.getConsultasRealizdas()+ ".\n");
+				textArea_VisualizarClientes.append("    Idade: ");
+				textArea_VisualizarClientes.append(pet.getIdade()+ ".\n");
 				
-				textArea_VisualizarClientes.append("    Ultima Consulta: ");
-				textArea_VisualizarClientes.append(ultimaConsulta + ".\n");
 
-			} catch(Exception ex) {
-				textArea_VisualizarClientes.append("    Pet ainda não consultado.\n");
+				textArea_VisualizarClientes.append("    Espécie: ");
+				textArea_VisualizarClientes.append(pet.getEspecie()+ ".\n");
+				
+				textArea_VisualizarClientes.append("    Raça: ");
+				textArea_VisualizarClientes.append(pet.getRaca()+ ".\n");
+				
+				String ultimaConsulta = "";
+				
+				try {
+					ultimaConsulta = pet.getUltimaConsulta().getDataFormatada();
+					
+					textArea_VisualizarClientes.append("    Número de Consultas Realizadas: ");
+					textArea_VisualizarClientes.append(pet.getConsultasRealizdas()+ ".\n");
+					
+					textArea_VisualizarClientes.append("    Ultima Consulta: ");
+					textArea_VisualizarClientes.append(ultimaConsulta + ".\n");
+
+				} catch(Exception ex) {
+					textArea_VisualizarClientes.append("    Pet ainda não consultado.\n");
+				}
+				
 			}
-			
+		} catch(NullPointerException npe) {
+			textArea_VisualizarClientes.setText("");
 		}
 		
 	}
@@ -257,12 +263,6 @@ public class Main {
 			consultas = pet.getConsultas();
 			ultimaConsulta = pet.getUltimaConsulta().getDataFormatada();
 			consultasRealizadas = pet.getConsultasRealizdas();
-			
-			
-			
-		} catch (NullPointerException npe) {
-			
-		} finally {
 			textArea_VisualizarPets.append("Cadastro: ");
 			textArea_VisualizarPets.append(cadastro + ".\n");
 			
@@ -296,9 +296,14 @@ public class Main {
 				textArea_VisualizarPets.append("O pet ainda não foi consultado.");
 				
 			}
+			textArea_VisualizarPets.append("\n");
+			
+			
+			
+		} catch (NullPointerException npe) {
 		}
 
-		textArea_VisualizarPets.append("\n");
+
 	}
 		
 	
@@ -706,6 +711,7 @@ public class Main {
 		mntmIrParaO.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				mostrarPainel(EasterEgg);
+				EasterEgg.reset();
 			}
 		});
 		popupMenu.add(mntmIrParaO);
@@ -755,12 +761,8 @@ public class Main {
 				Cliente dono = (Cliente) comboBox_cliente_cadastroPet.getSelectedItem();
 				try { //evitar que algum animal coloque que o pet tem Li anos
 					idade = Integer.parseInt(textField_cadastroPet_idadeDoPet.getText());
-
-				} catch(Exception exc) {
-					System.out.println("Algum dos dados inseridos esta errado");
-				}  finally {
 					dono.cadastrarPet(nome, idade, especie, raca);
-				
+					
 					if (clientes.size() == 1) {
 						adicionarEmTodasComboBox(new Pet(nome, dono.getPetsCadastrados()-1, idade, especie, raca));
 				
@@ -769,9 +771,9 @@ public class Main {
 						atualizarVisualizadorCliente();
 						
 					}
-					
-					
-					
+
+				} catch(Exception exc) {
+					System.out.println("Algum dos dados inseridos esta errado");
 				}
 
 			}
@@ -896,9 +898,12 @@ public class Main {
 				Cliente cliente = (Cliente) comboBox_cliente_agendador.getSelectedItem();
 				
 				comboBox_pet_agendador.removeAllItems();
-				for (int i = 0; i < cliente.getPets().size(); i++) {
-					comboBox_pet_agendador.addItem(cliente.getPets().get(i));
+				if (clientes.size() > 0) {
+					for (int i = 0; i < cliente.getPets().size(); i++) {
+						comboBox_pet_agendador.addItem(cliente.getPets().get(i));
+					}
 				}
+
 				
 			}
 		});
