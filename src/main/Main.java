@@ -832,6 +832,8 @@ public class Main {
 		JMenuItem mntmIrParaO = new JMenuItem("Ir para o EasterEgg");
 		mntmIrParaO.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				salvarInformacoesClientes();
+				salvarInformacoesConsultas();
 				mostrarPainel(EasterEgg);
 				EasterEgg.reset();
 			}
