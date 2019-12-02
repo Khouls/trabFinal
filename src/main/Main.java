@@ -27,6 +27,12 @@ import javax.swing.JPopupMenu;
 import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 
@@ -105,7 +111,6 @@ public class Main {
 	private JComboBox<Cliente> comboBox_cliente_remocaoPet;
 	private JButton btnRemover_pet_Voltar;
 	private JButton btn_removerPet;
-	private JLabel lblSelecioneOPet;
 	private JComboBox<Pet> comboBox_pet_remocaoPet;
 	private ArrayList<JPanel> panels;
 	
@@ -131,6 +136,19 @@ public class Main {
 	private JComboBox<String> comboBox_mesesDoAno;
 	private JTextArea textArea_VisualizarConsultas;
 	private JTextArea textArea_cancelador;
+	private File f_clientes;
+	private File f_consultas;
+	private ArrayList<Cliente> clientes;
+	private ArrayList<Consulta> consultasAgendadas;
+	private JButton btnSalvar_remocaoCliente;
+	private JButton btnSalvar_1;
+	private JLabel lblMostrador_agendador;
+	private Color verde;
+	private Color vermelho;
+	private JLabel lblMostrador_cadastroCliente;
+	private JLabel lblMostrador_cadastroPet;
+	
+
 
 	/**
 	 * Launch the application.
@@ -138,9 +156,6 @@ public class Main {
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
-				
-				
-				
 				try {
 					Main window = new Main();
 					window.frame.setVisible(true);
@@ -151,22 +166,18 @@ public class Main {
 		});
 	}
 
-	//método que facilita a vida pra esconder todos e mostrar só o que for passado
+	// método que facilita a vida pra esconder todos e mostrar só o que for passado
 	private void mostrarPainel(JPanel panel) {
 		for (int i = 0; i < panels.size(); i++) {
 			panels.get(i).setVisible(false);
-
-			
 		}
-		
-		
 		// talvez fosse melhor fazer com IF e Else pra verificar se o objeto é o certo
-		//mas consumiria mais processamento, então fica assim mesmo
+		// mas consumiria mais processamento, então fica assim mesmo
 		panel.setVisible(true);
 		
 	}
 	
-	//metodo pra adicionaro o cliente em todas as combobox
+	// metodo pra adicionar o cliente em todas as combobox
 	private void adicionarEmTodasComboBox(Cliente cliente) {
 		for (int i = 0; i < comboBoxes_Clientes.size(); i++) {
 			comboBoxes_Clientes.get(i).addItem(cliente);
@@ -183,7 +194,88 @@ public class Main {
 		
 	}
 	
-	//metodo pra atualizar a textArea do visualizador (Clientes)
+	private void limparTodasComboBoxPet() {
+		for (int i = 0; i < comboBoxes_Pets.size(); i++) {
+			comboBoxes_Pets.get(i).removeAllItems();
+		}
+	}
+	
+	// metodos que escrevem os cadastros nos arquivos
+	// clientes:
+	private void salvarInformacoesClientes() {
+
+		try {
+			FileWriter fw_clientes = new FileWriter(f_clientes, false);
+			BufferedWriter bw_clientes = new BufferedWriter(fw_clientes);
+			
+			for (int i = 0; i < clientes.size(); i++) {
+				Cliente cliente = clientes.get(i);
+
+				bw_clientes.append(cliente.getCpf());
+				bw_clientes.append("\n");
+				
+				File f = new File("data/clientes/" + cliente.getCpf() + ".txt");
+				f.createNewFile();
+				
+				FileWriter fw = new FileWriter(f, false);
+				BufferedWriter bw = new BufferedWriter(fw);
+
+				bw.write(cliente.getNome() + "\n");
+				bw.write(cliente.getCpf() + "\n");
+				bw.write(cliente.getEmail() + "\n");
+				bw.write(String.valueOf(cliente.getTelefone()) + "\n");
+				bw.write(String.valueOf(cliente.getPetsCadastrados()) + "\n");
+				
+				ArrayList<Pet> pets = cliente.getPets();
+				
+				for (int j = 0; j < pets.size() ; j++) {
+					Pet pet = pets.get(i);
+					bw.write(pet.getNome() + "\n");
+					bw.write(pet.getIdade() + "\n");
+					bw.write(pet.getEspecie() + "\n");
+					bw.write(pet.getRaca() + "\n");
+				}
+				bw.close();
+				fw.close();
+			}
+			
+			bw_clientes.close();
+			fw_clientes.close();
+			
+		} catch (IOException e) {
+			
+		}
+	}
+	
+	// consultas:
+	
+	private void salvarInformacoesConsultas() {
+		try {
+			FileWriter fw_consultas = new FileWriter(f_consultas, false);
+			BufferedWriter bw_consultas = new BufferedWriter(fw_consultas);
+			
+			for (int i = 0; i < consultasAgendadas.size(); i++) {
+				Consulta consulta = consultasAgendadas.get(i);
+				
+				bw_consultas.write(String.valueOf(consulta.getData().getHora()) + " ");
+				bw_consultas.write(String.valueOf(consulta.getData().getMinuto()) + " ");
+				bw_consultas.write(String.valueOf(consulta.getData().getDia()) + " ");
+				bw_consultas.write(String.valueOf(consulta.getData().getMes()) + " ");
+				bw_consultas.write(String.valueOf(consulta.getData().getAno()) + " ");
+				bw_consultas.write(String.valueOf(consulta.getVeterinario() + " "));
+				bw_consultas.write(String.valueOf(consulta.getCliente().getCpf() + " "));
+				bw_consultas.write(String.valueOf(consulta.getPetConsultado().getCadastro() + "\n"));
+			}
+			bw_consultas.close();
+			fw_consultas.close();
+			
+		} catch (IOException e) {
+		}
+		
+	}
+	
+	
+	// metodo pra atualizar a textArea do visualizador (Clientes)
 	
 	private void atualizarVisualizadorCliente() {
 		Cliente c =  null; 
@@ -199,7 +291,8 @@ public class Main {
 			textArea_VisualizarClientes.append(c.getEmail() + ".\n");
 			textArea_VisualizarClientes.append("Telefone: ");
 			textArea_VisualizarClientes.append(c.getTelefone() + ".\n");
-			textArea_VisualizarClientes.append("Pets cadastrados: \n");
+			textArea_VisualizarClientes.append("Pets cadastrados: ");
+			textArea_VisualizarClientes.append(c.getPetsCadastrados() + " \n");
 			
 			for (int i = 0; i < c.getPets().size(); i++) {
 				Pet pet = c.getPets().get(i);
@@ -239,7 +332,7 @@ public class Main {
 		
 	}
 	
-	//metodo pra atualizar a textArea do visualizador (Pets)
+	// metodo pra atualizar a textArea do visualizador (Pets)
 	private void atualizarVisualizadorPet() {
 		Pet pet;
 		String cadastro = "";
@@ -252,16 +345,22 @@ public class Main {
 		ArrayList<Consulta> consultas = null;
 		
 		textArea_VisualizarPets.setText("");
+
 		try {
-			//tenta pegar o pet
+			// tenta pegar o pet
 			pet = (Pet) comboBox_pet_visualizadorPets.getSelectedItem();
-			
 			cadastro = String.valueOf(pet.getCadastro());
 			nome = pet.getNome();
 			idade = String.valueOf(pet.getIdade());
 			dono = ((Cliente)comboBox_cliente_visualizadorPets.getSelectedItem()).getNome();
+
 			consultas = pet.getConsultas();
-			ultimaConsulta = pet.getUltimaConsulta().getDataFormatada();
+			try { // quando o pet é criado, não houve ultima consulta, logo a data seria null, o que gera uma NullPointerException				
+				ultimaConsulta = pet.getUltimaConsulta().getDataFormatada();
+
+			} catch (NullPointerException npe) {
+			}
+
 			consultasRealizadas = pet.getConsultasRealizdas();
 			textArea_VisualizarPets.append("Cadastro: ");
 			textArea_VisualizarPets.append(cadastro + ".\n");
@@ -305,10 +404,19 @@ public class Main {
 
 
 	}
+	
+	// método que faz a label ficar vermelha ou verde, dando feedback
+	private void colorizarLabel(JLabel label,boolean sucesso) {
+		if (sucesso) {
+			label.setText("Informações Salvas!");
+			label.setForeground(verde);
+		} else {
+			label.setText("Erro nas Informações!");
+			label.setForeground(vermelho);
+		}
 		
-	
-	
-	
+	}
+		
 	
 	/**
 	 * Create the application.
@@ -322,9 +430,12 @@ public class Main {
 	 */
 	private void initialize() {
 		
-		ArrayList<Cliente> clientes = new ArrayList<Cliente>();
-		ArrayList<Consulta> consultasAgendadas = new ArrayList<Consulta>();
-
+		verde = new Color(0, 255, 34);
+		vermelho = new Color(255, 7, 0);
+		
+		clientes = new ArrayList<Cliente>();
+		consultasAgendadas = new ArrayList<Consulta>();
+		
 		frame = new JFrame();
 		frame.setResizable(false);
 		frame.setBounds(100, 100, 450, 400);
@@ -475,6 +586,12 @@ public class Main {
 		btnCadastros.setBounds(10, 67, 114, 33);
 		pHome.add(btnCadastros);
 		
+		JButton btnSalvar = new JButton("Salvar");
+		btnSalvar.setBorder(new CompoundBorder(new LineBorder(new Color(0, 0, 0)), null));
+		btnSalvar.setBackground(SystemColor.controlHighlight);
+		btnSalvar.setBounds(318, 282, 114, 33);
+		pHome.add(btnSalvar);
+		
 
 		
 		JLabel lblCadastros = new JLabel("Cadastros");
@@ -570,8 +687,6 @@ public class Main {
 					valido = false;
 				}
 
-
-
 				 // Cpf e' o identificador unico
 				for (int i = 0; i < clientes.size(); i++) { //entao nao pode ter 2 iguais
 					if (clientes.get(i).getCpf().equals(cpf)) {
@@ -583,10 +698,11 @@ public class Main {
 					// adiciona o cliente em tudo
 					clientes.add(cliente);
 					adicionarEmTodasComboBox(cliente);
-					
-				} else {
-					System.out.println("CPF JA CADASTRADO");
 				}
+				
+				colorizarLabel(lblMostrador_cadastroCliente, valido);
+				
+				salvarInformacoesClientes();
 			}
 		});
 		btnCadastrar.setBorder(new CompoundBorder(new LineBorder(new Color(0, 0, 0)), null));
@@ -628,6 +744,12 @@ public class Main {
 		lblEmailDoCliente.setBounds(265, 0, 144, 44);
 		pCadastro_cliente.add(lblEmailDoCliente);
 		
+		lblMostrador_cadastroCliente = new JLabel("");
+		lblMostrador_cadastroCliente.setHorizontalAlignment(SwingConstants.CENTER);
+		lblMostrador_cadastroCliente.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		lblMostrador_cadastroCliente.setBounds(12, 267, 408, 41);
+		pCadastro_cliente.add(lblMostrador_cadastroCliente);
+		
 
 		comboBox_consulta_cancelador = new JComboBox<Consulta>();
 		comboBox_consulta_cancelador.addActionListener(new ActionListener() {
@@ -665,10 +787,10 @@ public class Main {
 		});
 		btnConsulta_cancela_Voltar.setBorder(new CompoundBorder(new LineBorder(new Color(0, 0, 0)), null));
 		btnConsulta_cancela_Voltar.setBackground(SystemColor.controlHighlight);
-		btnConsulta_cancela_Voltar.setBounds(350, 187, 82, 41);
+		btnConsulta_cancela_Voltar.setBounds(173, 258, 82, 41);
 		pCancelador.add(btnConsulta_cancela_Voltar);
 		
-		btnConsulta_cancela_Confirma = new JButton("Cancelar");
+		btnConsulta_cancela_Confirma = new JButton("Remover");
 		btnConsulta_cancela_Confirma.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Consulta cons = (Consulta) comboBox_consulta_cancelador.getSelectedItem();
@@ -715,6 +837,17 @@ public class Main {
 			}
 		});
 		popupMenu.add(mntmIrParaO);
+		
+		btnSalvar_1 = new JButton("Salvar");
+		btnSalvar_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				salvarInformacoesConsultas();
+			}
+		});
+		btnSalvar_1.setBorder(new CompoundBorder(new LineBorder(new Color(0, 0, 0)), null));
+		btnSalvar_1.setBackground(SystemColor.controlHighlight);
+		btnSalvar_1.setBounds(350, 187, 82, 41);
+		pCancelador.add(btnSalvar_1);
 
 		JLabel lblIdadeDoPet = new JLabel("Idade do pet:");
 		lblIdadeDoPet.setHorizontalAlignment(SwingConstants.CENTER);
@@ -753,6 +886,7 @@ public class Main {
 		btn_cadastrarPet = new JButton("Cadastrar");
 		btn_cadastrarPet.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				boolean sucesso = true;
 				int idade = 0;
 				String nome = textField_cadastroPet_nomedoPet.getText();
 
@@ -771,10 +905,12 @@ public class Main {
 						atualizarVisualizadorCliente();
 						
 					}
-
+					salvarInformacoesClientes();
 				} catch(Exception exc) {
-					System.out.println("Algum dos dados inseridos esta errado");
+					sucesso = false;
 				}
+				
+				colorizarLabel(lblMostrador_cadastroPet, sucesso);
 
 			}
 		});
@@ -810,6 +946,12 @@ public class Main {
 		pCadastro_pet.add(comboBox_cliente_cadastroPet);
 		comboBoxes_Clientes.add(comboBox_cliente_cadastroPet);
 		
+		lblMostrador_cadastroPet = new JLabel("");
+		lblMostrador_cadastroPet.setHorizontalAlignment(SwingConstants.CENTER);
+		lblMostrador_cadastroPet.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		lblMostrador_cadastroPet.setBounds(10, 256, 408, 41);
+		pCadastro_pet.add(lblMostrador_cadastroPet);
+		
 
 		
 		btnAgendador_voltar = new JButton("Voltar");
@@ -839,17 +981,27 @@ public class Main {
 				Pet pet = (Pet) comboBox_pet_agendador.getSelectedItem();
 				Cliente cliente = (Cliente) comboBox_cliente_agendador.getSelectedItem();
 				
-				Consulta consulta = new Consulta(dataDaConsulta, veterinario, cliente, pet);
+				boolean informacoesCorretas = (!veterinario.equals("")) && (cliente != null) && (pet != null);
 				
-				pet.consultar(consulta);
+				if (informacoesCorretas) {
+					Consulta consulta = new Consulta(dataDaConsulta, veterinario, cliente, pet);
+					
+					pet.consultar(consulta);
+					
+					consultasAgendadas.add(consulta);
+					
+					comboBox_consulta_cancelador.addItem(consulta);
+					
+					textArea_VisualizarConsultas.append(consulta.formatar());
+					textArea_VisualizarConsultas.append("\n");
+					atualizarVisualizadorPet();
+					salvarInformacoesConsultas();
+				}
 				
-				consultasAgendadas.add(consulta);
+				colorizarLabel(lblMostrador_agendador, informacoesCorretas);
+
 				
-				comboBox_consulta_cancelador.addItem(consulta);
-				
-				textArea_VisualizarConsultas.append(consulta.formatar());
-				textArea_VisualizarConsultas.append("\n");
-				atualizarVisualizadorCliente();
+
 				
 
 			}
@@ -971,6 +1123,12 @@ public class Main {
 		comboBox_mesesDoAno.addItem("Dezembro");
 		
 		pAgendador.add(comboBox_mesesDoAno);
+		
+		lblMostrador_agendador = new JLabel("");
+		lblMostrador_agendador.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		lblMostrador_agendador.setHorizontalAlignment(SwingConstants.CENTER);
+		lblMostrador_agendador.setBounds(10, 235, 408, 41);
+		pAgendador.add(lblMostrador_agendador);
 		
 		
 
@@ -1191,7 +1349,7 @@ public class Main {
 		});
 		btnRemover_cliente_Voltar.setBorder(new CompoundBorder(new LineBorder(new Color(0, 0, 0)), null));
 		btnRemover_cliente_Voltar.setBackground(SystemColor.controlHighlight);
-		btnRemover_cliente_Voltar.setBounds(162, 187, 119, 33);
+		btnRemover_cliente_Voltar.setBounds(161, 189, 119, 33);
 		pRemover_cliente.add(btnRemover_cliente_Voltar);
 		
 		btnRemover = new JButton("Remover");
@@ -1206,12 +1364,37 @@ public class Main {
 					
 				}
 				
+				// Quando o cliente for excluido, excluir tambem todas as consultas dele:
+				
+				for (int i= 0; i < consultasAgendadas.size(); i++) {
+					Consulta consulta = consultasAgendadas.get(i);
+					
+					if (consulta.getCliente().getCpf().equals(cliente.getCpf())) {
+						// provavelmente daria para comparar os dois objetos diretamente,
+						// ja que eu tenho quase certeza que o objeto da arraylist é só um
+						// "pointer" pra o objeto, mas vamos pelo lado segur, afinal tem chave única.
+						consultasAgendadas.remove(consulta);
+					}
+					
+				}
+				
 			}
 		});
 		btnRemover.setBorder(new CompoundBorder(new LineBorder(new Color(0, 0, 0)), null));
 		btnRemover.setBackground(SystemColor.controlHighlight);
-		btnRemover.setBounds(162, 131, 119, 33);
+		btnRemover.setBounds(100, 134, 119, 33);
 		pRemover_cliente.add(btnRemover);
+		
+		btnSalvar_remocaoCliente = new JButton("Salvar");
+		btnSalvar_remocaoCliente.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				salvarInformacoesClientes();
+			}
+		});
+		btnSalvar_remocaoCliente.setBorder(new CompoundBorder(new LineBorder(new Color(0, 0, 0)), null));
+		btnSalvar_remocaoCliente.setBackground(SystemColor.controlHighlight);
+		btnSalvar_remocaoCliente.setBounds(231, 134, 119, 33);
+		pRemover_cliente.add(btnSalvar_remocaoCliente);
 		
 		btnVoltar_1 = new JButton("Voltar");
 		btnVoltar_1.addActionListener(new ActionListener() {
@@ -1268,6 +1451,21 @@ public class Main {
 		pRemover_pet.add(label_3);
 		
 		comboBox_cliente_remocaoPet = new JComboBox<Cliente>();
+		comboBox_cliente_remocaoPet.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				comboBox_pet_remocaoPet.removeAllItems();
+				try { // se não tiver cliente isso é null -> NullPointerException 
+					Cliente cliente = (Cliente) comboBox_cliente_remocaoPet.getSelectedItem();
+					for (int i = 0; i < cliente.getPets().size(); i++) {
+						comboBox_pet_remocaoPet.addItem(cliente.getPets().get(i));
+					}
+				} catch (NullPointerException npe) {
+					
+				}
+
+				
+			}
+		});
 		comboBox_cliente_remocaoPet.setBounds(67, 113, 119, 20);
 		pRemover_pet.add(comboBox_cliente_remocaoPet);
 		comboBoxes_Clientes.add(comboBox_cliente_remocaoPet);
@@ -1282,7 +1480,7 @@ public class Main {
 		});
 		btnRemover_pet_Voltar.setBorder(new CompoundBorder(new LineBorder(new Color(0, 0, 0)), null));
 		btnRemover_pet_Voltar.setBackground(SystemColor.controlHighlight);
-		btnRemover_pet_Voltar.setBounds(223, 154, 119, 49);
+		btnRemover_pet_Voltar.setBounds(154, 228, 119, 33);
 		pRemover_pet.add(btnRemover_pet_Voltar);
 		
 		btn_removerPet = new JButton("Remover");
@@ -1292,6 +1490,7 @@ public class Main {
 				Cliente dono = (Cliente) comboBox_cliente_remocaoPet.getSelectedItem();
 				
 				dono.getPets().remove(pet);
+				dono.updatePetsCadastrados();
 				
 				for (int i = 0; i < comboBoxes_Pets.size(); i++) {
 					try {
@@ -1299,11 +1498,23 @@ public class Main {
 					} catch (Exception ex) {}
 				}
 				
+				// Quando o pet for deletado, deletar tambem as consultas dele:
+				
+				for (int i = 0; i < consultasAgendadas.size(); i++) {
+					Consulta consulta = consultasAgendadas.get(i);
+					Pet petConsultado = consulta.getPetConsultado();
+					Cliente clienteConsulta = consulta.getCliente();
+					if (clienteConsulta.getCpf().equals(dono.getCpf()) && petConsultado.getCadastro() == pet.getCadastro()) {
+						consultasAgendadas.remove(i);
+					}
+				}
+				
+				
 			}
 		});
 		btn_removerPet.setBorder(new CompoundBorder(new LineBorder(new Color(0, 0, 0)), null));
 		btn_removerPet.setBackground(SystemColor.controlHighlight);
-		btn_removerPet.setBounds(223, 84, 119, 49);
+		btn_removerPet.setBounds(223, 107, 119, 33);
 		pRemover_pet.add(btn_removerPet);
 		
 		lblSelecioneOPet = new JLabel("Selecione o Pet");
@@ -1315,6 +1526,17 @@ public class Main {
 		comboBox_pet_remocaoPet.setBounds(67, 183, 119, 20);
 		pRemover_pet.add(comboBox_pet_remocaoPet);
 		comboBoxes_Pets.add(comboBox_pet_remocaoPet);
+		
+		JButton btnSalvar_remocaoPet = new JButton("Salvar");
+		btnSalvar_remocaoPet.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				salvarInformacoesClientes();
+			}
+		});
+		btnSalvar_remocaoPet.setBorder(new CompoundBorder(new LineBorder(new Color(0, 0, 0)), null));
+		btnSalvar_remocaoPet.setBackground(SystemColor.controlHighlight);
+		btnSalvar_remocaoPet.setBounds(223, 177, 119, 33);
+		pRemover_pet.add(btnSalvar_remocaoPet);
 		
 		JMenuBar menuBar = new JMenuBar();
 		menuBar.setBorderPainted(false);
@@ -1416,6 +1638,97 @@ public class Main {
 			}
 		});
 		mnRemover.add(mntmRemoverPet);
+		
+		// Quando tudo estiver inicializado, recupera as as informações de cadastros
+		
+		// Pega clientes:
+		try {
+			f_clientes = new File("data/clientes.txt");
+
+			FileReader fr_clientes = new FileReader(f_clientes);
+			BufferedReader br_clientes = new BufferedReader(fr_clientes);
+			
+			String linha;
+			
+			while((linha = br_clientes.readLine()) != null) {
+				File file_cliente = new File("data/clientes/" + linha + ".txt");
+				file_cliente.createNewFile();
+				
+				FileReader fr = new FileReader(file_cliente);
+				BufferedReader br =  new BufferedReader(fr);
+				
+				String nome = br.readLine();
+				String cpf = br.readLine();
+				String email = br.readLine();
+				int telefone = Integer.parseInt(br.readLine());
+				
+				Cliente donoPet = new Cliente(nome, cpf, email, telefone);
+				
+				int petsCadastrados = Integer.parseInt(br.readLine());
+				limparTodasComboBoxPet();
+				for (int i = 0; i < petsCadastrados; i++) {
+					String nomePet = br.readLine();
+					int idadePet = Integer.parseInt(br.readLine());
+					String especiePet = br.readLine();
+					String racaPet = br.readLine();
+					donoPet.cadastrarPet(nomePet, idadePet, especiePet, racaPet);
+					adicionarEmTodasComboBox(new Pet(nomePet, donoPet.getPetsCadastrados()-1, idadePet, especiePet, racaPet));
+					
+				}
+				br.close();
+				fr.close();
+				clientes.add(donoPet);
+				adicionarEmTodasComboBox(donoPet);
+				
+			}
+			br_clientes.close();
+			fr_clientes.close();
+			
+			// Pega consultas:
+			f_consultas = new File("data/consultas.txt");
+
+			
+			FileReader fr_consultas = new FileReader(f_consultas);
+			BufferedReader br_consultas = new BufferedReader(fr_consultas);
+			
+			linha = "";
+			
+			while((linha = br_consultas.readLine()) != null) {
+				String[] val = linha.split(" ");
+				int hora = Integer.parseInt(val[0]);
+				int minuto = Integer.parseInt(val[1]);
+				int dia = Integer.parseInt(val[2]);
+				int mes = Integer.parseInt(val[3]);
+				int ano = Integer.parseInt(val[4]);
+				String veterinario = val[5];
+				String cpf = val[6];
+				int cadastroPet = Integer.parseInt(val[7]); 
+				Cliente cliente = null;
+				Pet pet = null;
+				for (int i = 0; i < clientes.size(); i++) {
+					if(clientes.get(i).getCpf().equals(cpf)) {
+						cliente = clientes.get(i);
+						pet = clientes.get(i).getPets().get(cadastroPet);
+					}
+				}
+				
+				Data data = new Data(minuto, hora, dia, mes, ano);
+				
+				Consulta consulta = new Consulta(data, veterinario, cliente, pet);
+				
+				consultasAgendadas.add(consulta);
+				comboBox_consulta_cancelador.addItem(consulta);
+				textArea_VisualizarConsultas.append(consulta.formatar());
+				
+			}
+			
+			br_consultas.close();
+			fr_consultas.close();
+			
+		} catch (Exception e) {
+			
+		}
+		
 	}
 	private static void addPopup(Component component, final JPopupMenu popup) {
 		component.addMouseListener(new MouseAdapter() {

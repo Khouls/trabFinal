@@ -1,17 +1,24 @@
 package jogoDaVelha;
 
+
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 public class PanelJogoDaVelha extends JPanel implements MouseListener{
 
 	int w, h;
+	
+	Color vermelho = new Color(255,  13, 47);
+	Color azul = new Color(107, 92, 255);
+	Color verde  =  new Color(117, 255, 110);
+	Color preto = new Color(0, 0, 0);
+	
 	int[][] casas = new int[3][3];
 	/*
 	 * [0][0] [1][0] [2][0]
@@ -23,27 +30,25 @@ public class PanelJogoDaVelha extends JPanel implements MouseListener{
 	
 	boolean turno; // O = false, X = true
 	boolean vencedor;
-
-
-	
+	boolean acabou;
 			
 	public PanelJogoDaVelha(int w, int h) {
 		super();
 		addMouseListener(this);
 		this.w = w;
 		this.h = h;
-		
 	}
-	
 	
 
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
+		setBackground(verde);
 		g.setFont(F);
 		
 		if(testarVitoria()) { // testa pra ver se alguem ganhou
-			
+			acabou = true;
+			g.setColor(preto);
 			
 			if (vencedor) {
 				g.drawString("X Venceu!", w/2 - 60, h/2);
@@ -63,41 +68,47 @@ public class PanelJogoDaVelha extends JPanel implements MouseListener{
 			}
 			
 			if (deuVelha) {
+				g.setColor(preto);
 				g.drawString("Deu Velha!", w/2 - 70, h/2);
-
-				
+				acabou = true;
 			}
 			
-			
-			
-			int casaY = 0;
-			for (int i = 0; i < w; i += 100) {
-				int casaX = 0;
-	
-				for (int j = 0; j < h; j += 100) {
-					g.drawRect(i, j, 100, 100);
-	
-					switch (casas[casaX][casaY]) { // na array casas[][], 0 é uma casa em branco (não desenha nada)
-					
-						case 1: // 1 é uma casa com X
-							g.drawLine(i+5, j+5, i+95, j+95);
-							g.drawLine(i+95, j+5, i+5, j+95);
-							break;
-							
-						case 2: // 2  é uma cas com O
-							g.drawOval(i+5, j+5, 90, 90);
-							break;
-					}
-					
-	
-					casaX++;
-				}
-	
-				casaY++;
-			}
-			
-		}	
+			else {
+				int casaY = 0;
+				for (int i = 0; i < w; i += 100) {
+					int casaX = 0;
 		
+					for (int j = 0; j < h; j += 100) {
+						g.setColor(preto);
+						g.drawRect(i, j, 100, 100); //desenha a grid
+		
+						switch (casas[casaX][casaY]) { // na array casas[][], 0 é uma casa em branco (não desenha nada)
+						
+							case 1: // 1 é uma casa com X
+								g.setColor(azul);
+								g.drawLine(i+5, j+5, i+95, j+95);
+								g.drawLine(i+95, j+5, i+5, j+95);
+								break;
+								
+							case 2: // 2  é uma cas com O
+								g.setColor(vermelho);
+								g.drawOval(i+5, j+5, 90, 90);
+								break;
+						}
+		
+						casaX++;
+					}		
+					casaY++;
+				}
+			}	
+		}
+		
+		// Quando acabar fecha o programa após 2 segundos	
+		if (acabou) {
+			new FechadorPrograma(2);
+			
+
+		}
 	}
 	
 	public boolean testarVitoria(){
@@ -132,7 +143,7 @@ public class PanelJogoDaVelha extends JPanel implements MouseListener{
 	}
 	
 	@Override
-	public void mouseClicked(MouseEvent arg0) {
+	public void mousePressed(MouseEvent arg0) {
 		int X = arg0.getX();
 		int Y = arg0.getY();
 		
@@ -154,21 +165,15 @@ public class PanelJogoDaVelha extends JPanel implements MouseListener{
 			sobreCasaY = 1;
 		}
 		
-
-		
 		if (casas[sobreCasaY][sobreCasaX] == 0) {
 			casas[sobreCasaY][sobreCasaX] = turno ? 1 : 2;
 			turno = turno ? false : true;
-		}
-		
-		
-		
+		}	
 		repaint();
-		
-		
 		
 	}
 
+	
 	@Override
 	public void mouseEntered(MouseEvent arg0) {
 		
@@ -180,7 +185,7 @@ public class PanelJogoDaVelha extends JPanel implements MouseListener{
 	}
 
 	@Override
-	public void mousePressed(MouseEvent arg0) {
+	public void mouseClicked(MouseEvent arg0) {
 		
 	}
 
