@@ -214,7 +214,7 @@ public class Main {
 				bw_clientes.append(cliente.getCpf());
 				bw_clientes.append("\n");
 				
-				File f = new File("data/clientes/" + cliente.getCpf() + ".txt");
+				File f = new File("registros/clientes/" + cliente.getCpf() + ".txt");
 				f.createNewFile();
 				
 				FileWriter fw = new FileWriter(f, false);
@@ -435,6 +435,7 @@ public class Main {
 		
 		clientes = new ArrayList<Cliente>();
 		consultasAgendadas = new ArrayList<Consulta>();
+		ArrayList<Cliente> clientesDeletados = new ArrayList<Cliente>();
 		
 		frame = new JFrame();
 		frame.setResizable(false);
@@ -1370,15 +1371,26 @@ public class Main {
 				
 				for (int i= 0; i < consultasAgendadas.size(); i++) {
 					Consulta consulta = consultasAgendadas.get(i);
-					
-					if (consulta.getCliente().getCpf().equals(cliente.getCpf())) {
-						// provavelmente daria para comparar os dois objetos diretamente,
-						// ja que eu tenho quase certeza que o objeto da arraylist é só um
-						// "pointer" pra o objeto, mas vamos pelo lado segur, afinal tem chave única.
-						consultasAgendadas.remove(consulta);
-					}
+						try { // se n tiver consultas, gera NullPointerException
+							if (consulta.getCliente().getCpf().equals(cliente.getCpf())) {
+							// provavelmente daria para comparar os dois objetos diretamente,
+							// ja que eu tenho quase certeza que o objeto da arraylist é só um
+							// "pointer" pra o objeto, mas vamos pelo lado segur, afinal tem chave única.
+							consultasAgendadas.remove(consulta);
+							}
+						
+						} catch (NullPointerException npe) {
+							
+						}
+
 					
 				}
+				
+				// Colocar o cliente na lista de delets
+				
+				clientesDeletados.add(cliente);
+				
+
 				
 			}
 		});
@@ -1390,7 +1402,20 @@ public class Main {
 		btnSalvar_remocaoCliente = new JButton("Salvar");
 		btnSalvar_remocaoCliente.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				
+				for (Cliente clienteDeletado : clientesDeletados) {
+					// testando essa estrutura nova
+					try {
+						File clienteDeletado_file = new File("registros/clientes/" + clienteDeletado.getCpf() + ".txt");
+						clienteDeletado_file.delete();
+					} catch (Exception ex) {
+
+					}
+				}
+				
+				clientesDeletados.clear();
 				salvarInformacoesClientes();
+				salvarInformacoesConsultas();
 			}
 		});
 		btnSalvar_remocaoCliente.setBorder(new CompoundBorder(new LineBorder(new Color(0, 0, 0)), null));
@@ -1645,7 +1670,14 @@ public class Main {
 		
 		// Pega clientes:
 		try {
-			f_clientes = new File("data/clientes.txt");
+			File pastaRegistros = new File("registros");
+			pastaRegistros.mkdir();
+			
+			File pastaClientes = new File("registros/clientes");
+			pastaClientes.mkdir();
+			
+			f_clientes = new File("registros/clientes.txt");
+			f_clientes.createNewFile();
 
 			FileReader fr_clientes = new FileReader(f_clientes);
 			BufferedReader br_clientes = new BufferedReader(fr_clientes);
@@ -1653,7 +1685,7 @@ public class Main {
 			String linha;
 			
 			while((linha = br_clientes.readLine()) != null) {
-				File file_cliente = new File("data/clientes/" + linha + ".txt");
+				File file_cliente = new File("registros/clientes/" + linha + ".txt");
 				file_cliente.createNewFile();
 				
 				FileReader fr = new FileReader(file_cliente);
@@ -1687,7 +1719,8 @@ public class Main {
 			fr_clientes.close();
 			
 			// Pega consultas:
-			f_consultas = new File("data/consultas.txt");
+			f_consultas = new File("registros/consultas.txt");
+			f_consultas.createNewFile();
 
 			
 			FileReader fr_consultas = new FileReader(f_consultas);
