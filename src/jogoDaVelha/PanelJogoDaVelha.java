@@ -8,6 +8,7 @@ import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 public class PanelJogoDaVelha extends JPanel implements MouseListener{
@@ -18,6 +19,8 @@ public class PanelJogoDaVelha extends JPanel implements MouseListener{
 	Color azul = new Color(107, 92, 255);
 	Color verde  =  new Color(117, 255, 110);
 	Color preto = new Color(0, 0, 0);
+	
+	JFrame f;
 	
 	int[][] casas = new int[3][3];
 	/*
@@ -32,8 +35,10 @@ public class PanelJogoDaVelha extends JPanel implements MouseListener{
 	boolean vencedor;
 	boolean acabou;
 			
-	public PanelJogoDaVelha(int w, int h) {
+	public PanelJogoDaVelha(int w, int h, JFrame f) {
 		super();
+		
+		this.f = f;
 		addMouseListener(this);
 		this.w = w;
 		this.h = h;
@@ -105,7 +110,7 @@ public class PanelJogoDaVelha extends JPanel implements MouseListener{
 		
 		// Quando acabar fecha o programa após 2 segundos	
 		if (acabou) {
-			new FechadorPrograma(2);
+			new FechadorPrograma(2, f);
 			
 
 		}
@@ -150,26 +155,31 @@ public class PanelJogoDaVelha extends JPanel implements MouseListener{
 		int sobreCasaX = 0;
 		int sobreCasaY = 0;
 		
-		
-		if (X > 200) {
-			sobreCasaX = 2;
+		if (X < 300 && Y < 300) {
+			//só executa se o mouse tiver dentro da area do jogoDaVelha
+			if (X > 200) {
+				sobreCasaX = 2;
+				
+			} else if (X > 100) {
+				sobreCasaX = 1;
+			}
 			
-		} else if (X > 100) {
-			sobreCasaX = 1;
+			if (Y > 200) {
+				sobreCasaY = 2;
+				
+			} else if (Y > 100) {
+				sobreCasaY = 1;
+			}
+			
+			if (casas[sobreCasaY][sobreCasaX] == 0) {
+				casas[sobreCasaY][sobreCasaX] = turno ? 1 : 2;
+				turno = turno ? false : true;
+			}	
+			repaint();
+			
 		}
 		
-		if (Y > 200) {
-			sobreCasaY = 2;
-			
-		} else if (Y > 100) {
-			sobreCasaY = 1;
-		}
-		
-		if (casas[sobreCasaY][sobreCasaX] == 0) {
-			casas[sobreCasaY][sobreCasaX] = turno ? 1 : 2;
-			turno = turno ? false : true;
-		}	
-		repaint();
+
 		
 	}
 
